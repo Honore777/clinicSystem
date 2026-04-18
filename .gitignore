@@ -5,3 +5,6 @@ __pycache__/
 *.pyc
 venv/
 env/
+# Local OAuth credential files (should not be committed)
+client_secret.json
+token.json
