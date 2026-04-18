@@ -1,0 +1,41 @@
+<header class="bg-white shadow">
+  <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+    {# Logo: small round mark used across the site; keep it prominent and on-brand #}
+    <a href="/" class="flex items-center gap-3" aria-label="Clinic home">
+      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-sky-600 to-blue-700 flex items-center justify-center text-white font-bold">CS</div>
+      <div>
+        <div class="text-lg font-semibold text-slate-900">ClinicSystem</div>
+        <div class="text-xs text-slate-500">Find and book clinic appointments</div>
+      </div>
+    </a>
+
+    <nav class="flex items-center gap-4" aria-label="Main navigation">
+      {# Primary nav links; adapt visibility using `session` state #}
+      <a href="/" class="text-slate-700 hover:text-sky-700">Home</a>
+      {# Show different links depending on session state; Jinja can access `session` #}
+        {% if session.get('patient_id') %}
+          <a href="/patient/dashboard" class="text-slate-700 hover:text-sky-700">My dashboard</a>
+          <a href="/notifications" class="relative text-slate-700 hover:text-sky-700" aria-label="Notifications">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a4 4 0 00-4 4v2.586L5.293 11.293A1 1 0 006 13h8a1 1 0 00.707-1.707L14 8.586V6a4 4 0 00-4-4z"/><path d="M4 14a2 2 0 002 2h8a2 2 0 002-2v-1H4v1z"/></svg>
+            {% if notification_unread_count|default(0) > 0 %}
+              <span class="absolute -top-1 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">{{ notification_unread_count }}</span>
+            {% endif %}
+          </a>
+          <a href="/auth/logout" class="text-slate-700">Logout</a>
+        {% elif session.get('staff_id') %}
+          <a href="/clinic/dashboard" class="text-slate-700 hover:text-sky-700">Clinic dashboard</a>
+          <a href="/clinic/staff" class="text-slate-700 hover:text-sky-700">Clinic users</a>
+          <a href="/notifications" class="relative text-slate-700 hover:text-sky-700" aria-label="Notifications">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a4 4 0 00-4 4v2.586L5.293 11.293A1 1 0 006 13h8a1 1 0 00.707-1.707L14 8.586V6a4 4 0 00-4-4z"/><path d="M4 14a2 2 0 002 2h8a2 2 0 002-2v-1H4v1z"/></svg>
+            {% if notification_unread_count|default(0) > 0 %}
+              <span class="absolute -top-1 -right-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">{{ notification_unread_count }}</span>
+            {% endif %}
+          </a>
+          <a href="/auth/logout" class="text-slate-700">Logout</a>
+        {% else %}
+          <a href="/auth/login" class="text-slate-700 hover:text-sky-700">Login</a>
+          <a href="/auth/register" class="px-3 py-1 bg-sky-600 text-white rounded hover:bg-sky-700">Sign up</a>
+        {% endif %}
+    </nav>
+  </div>
+</header>

@@ -1,0 +1,89 @@
+<div>
+  {{ form.csrf_token }}
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="md:col-span-2">
+      <label class="block text-sm text-slate-700">Clinic name</label>
+      {{ form.name(class='w-full border rounded px-3 py-2 mt-1') }}
+    </div>
+
+    <div>
+      <label class="block text-sm text-slate-700">Slug (optional)</label>
+      {{ form.slug(class='w-full border rounded px-3 py-2 mt-1') }}
+    </div>
+
+    <div>
+      <label class="block text-sm text-slate-700">City</label>
+      {{ form.city_id(class='w-full border rounded px-3 py-2 mt-1') }}
+    </div>
+
+    <div>
+      <label class="block text-sm text-slate-700">Contact phone</label>
+      {{ form.contact_phone(class='w-full border rounded px-3 py-2 mt-1') }}
+    </div>
+
+    <div class="md:col-span-2">
+      <label class="block text-sm text-slate-700 mt-2">Address</label>
+      {{ form.address(class='w-full border rounded px-3 py-2 mt-1') }}
+    </div>
+
+    <div>
+      <label class="block text-sm text-slate-700 mt-2">Contact email</label>
+      {{ form.contact_email(class='w-full border rounded px-3 py-2 mt-1') }}
+    </div>
+
+    <div>
+      <label class="block text-sm text-slate-700 mt-2">Website</label>
+      {{ form.website(class='w-full border rounded px-3 py-2 mt-1') }}
+    </div>
+
+    <div class="md:col-span-2">
+      <label class="block text-sm text-slate-700 mt-2">Short description</label>
+      {{ form.description(class='w-full border rounded px-3 py-2 mt-1', rows=3) }}
+    </div>
+
+    <div class="md:col-span-2">
+      <label class="block text-sm text-slate-700 mt-2">Services (comma separated)</label>
+      {{ form.services(class='w-full border rounded px-3 py-2 mt-1', rows=2) }}
+    </div>
+
+    <div>
+      <label class="block text-sm text-slate-700 mt-2">Latitude</label>
+      {{ form.latitude(class='w-full border rounded px-3 py-2 mt-1') }}
+    </div>
+
+    <div>
+      <label class="block text-sm text-slate-700 mt-2">Longitude</label>
+      {{ form.longitude(class='w-full border rounded px-3 py-2 mt-1') }}
+    </div>
+
+    <div class="md:col-span-2">
+      <label class="block text-sm text-slate-700 mt-2">Photos</label>
+      <input type="file" name="photos" multiple class="mt-1" />
+      <div class="text-xs text-slate-500 mt-1">Upload clear photos of the clinic entrance, reception, and consulting rooms for best results.</div>
+    </div>
+  </div>
+
+  <div class="mt-4 p-4 bg-slate-50 rounded">
+    <h3 class="font-semibold">Administrator (optional)</h3>
+    <p class="text-sm text-slate-500">Create a clinic administrator account now so they can manage bookings and staff.</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+      <div>
+        <label class="block text-sm text-slate-700">Admin name</label>
+        {{ form.admin_name(class='w-full border rounded px-3 py-2 mt-1') }}
+      </div>
+      <div>
+        <label class="block text-sm text-slate-700">Admin email</label>
+        {{ form.admin_email(class='w-full border rounded px-3 py-2 mt-1') }}
+      </div>
+      <div class="md:col-span-2">
+        <label class="block text-sm text-slate-700">Admin password</label>
+        {{ form.admin_password(class='w-full border rounded px-3 py-2 mt-1') }}
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    {{ form.submit(class='bg-sky-600 text-white px-4 py-2 rounded w-full') }}
+  </div>
+</div>

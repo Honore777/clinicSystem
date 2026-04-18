@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section class="relative overflow-hidden rounded-2xl mb-12 shadow-xl">
+
+  <!-- Background -->
+  <img src="/static/images/clinic%20system%20photo1.jfif"
+       alt="Login background"
+       class="absolute inset-0 w-full h-full object-cover scale-105">
+
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-gradient-to-br from-sky-900/80 via-blue-800/70 to-slate-900/80"></div>
+
+  <!-- Content -->
+  <div class="relative z-10 max-w-5xl mx-auto px-6 py-16">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+
+      <!-- LEFT SIDE -->
+      <div class="text-white space-y-5">
+        <h2 class="text-3xl md:text-4xl font-bold leading-tight">
+          Welcome back 👋
+        </h2>
+
+        <p class="text-slate-200 text-base leading-relaxed">
+          Access your appointments, confirmations, and communicate directly with your healthcare providers — all in one secure place.
+        </p>
+
+        <div class="pt-2">
+          <p class="text-sm text-slate-300">
+            New here?
+            <a href="/auth/register"
+               class="text-sky-300 hover:text-white font-medium underline underline-offset-4 transition">
+              Create an account
+            </a>
+          </p>
+        </div>
+      </div>
+
+      <!-- RIGHT SIDE (FORM) -->
+      <div>
+        <div class="bg-white/95 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/20">
+
+
+          <div class="flex items-center gap-4 mb-6">
+            <button type="button" id="toggle-patient" class="text-xl font-semibold text-slate-800 focus:outline-none border-b-2 pb-1 border-sky-600" onclick="showPatientLogin()">Patient Sign In</button>
+            <button type="button" id="toggle-staff" class="text-xl font-semibold text-slate-800 focus:outline-none border-b-2 pb-1 border-transparent" onclick="showStaffLogin()">Clinic Staff</button>
+          </div>
+
+          <div id="patient-login-form" style="display: block;">
+
+          <form method="post" class="space-y-4">
+            {{ form.csrf_token }}
+
+            <!-- Email -->
+            <div>
+              <label class="block text-sm font-medium text-slate-600 mb-1">
+                Email Address
+              </label>
+              {{ form.email(class='w-full border border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 rounded-lg px-4 py-2.5 outline-none transition') }}
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label class="block text-sm font-medium text-slate-600 mb-1">
+                Password
+              </label>
+              {{ form.password(class='w-full border border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 rounded-lg px-4 py-2.5 outline-none transition') }}
+            </div>
+
+            <!-- Submit -->
+            <div class="pt-2">
+              {{ form.submit(class='w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transition duration-200') }}
+            </div>
+
+            <!-- Forgot -->
+            <div class="text-xs text-slate-500 text-center pt-2">
+              Forgot your password?
+              <a href="/auth/forgot"
+                 class="text-sky-600 hover:text-sky-800 font-medium underline underline-offset-2">
+                Reset it
+              </a>
+            </div>
+
+          </form>
+          </div>
+
+          <div id="staff-login-form" style="display:none;">
+            <form method="post" action="/auth/staff/login" class="space-y-4">
+              {{ staff_form.csrf_token if staff_form else '' }}
+              <div>
+                <label class="block text-sm font-medium text-slate-600 mb-1">Work Email</label>
+                <input type="email" name="email" class="w-full border border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 rounded-lg px-4 py-2.5 outline-none transition" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-600 mb-1">Password</label>
+                <input type="password" name="password" class="w-full border border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 rounded-lg px-4 py-2.5 outline-none transition" required>
+              </div>
+              <button type="submit" class="w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transition duration-200">Sign In</button>
+            </form>
+          </div>
+
+          <script>
+            function showPatientLogin() {
+              document.getElementById('patient-login-form').style.display = 'block';
+              document.getElementById('staff-login-form').style.display = 'none';
+              document.getElementById('toggle-patient').classList.add('border-sky-600');
+              document.getElementById('toggle-staff').classList.remove('border-sky-600');
+            }
+            function showStaffLogin() {
+              document.getElementById('patient-login-form').style.display = 'none';
+              document.getElementById('staff-login-form').style.display = 'block';
+              document.getElementById('toggle-patient').classList.remove('border-sky-600');
+              document.getElementById('toggle-staff').classList.add('border-sky-600');
+            }
+            // Ensure correct default on page load
+            document.addEventListener('DOMContentLoaded', function() {
+              showPatientLogin();
+            });
+          </script>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}

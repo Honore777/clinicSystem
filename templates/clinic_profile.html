@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="bg-white p-6 rounded shadow">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="md:col-span-2">
+        <h1 class="text-2xl font-bold">{{ clinic.name }}</h1>
+        <div class="text-sm text-slate-500">{{ clinic.city_name or '—' }} • {{ clinic.address or '' }}</div>
+        <p class="mt-2 text-sm text-slate-600">{{ clinic.description }}</p>
+        {% if clinic.is_verified %}
+          <span class="inline-flex items-center mt-2 px-2 py-1 text-xs rounded-full bg-emerald-100 text-emerald-700">Verified clinic</span>
+        {% endif %}
+      </div>
+      <div class="md:col-span-1">
+        <div class="space-y-2">
+          {% if clinic.contact_phone %}<div><strong>Phone:</strong> {{ clinic.contact_phone }}</div>{% endif %}
+          {% if clinic.contact_email %}<div><strong>Email:</strong> {{ clinic.contact_email }}</div>{% endif %}
+          {% if clinic.website %}<div><a href="{{ clinic.website }}" class="text-sky-600">Website</a></div>{% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="mt-4">
+      <h3 class="font-semibold">Doctors</h3>
+      <ul>
+        {% for d in doctors %}
+          <li class="mb-2">
+            <div class="font-medium">{{ d.name }}{% if d.specialty %} — <span class="text-sm text-slate-500">{{ d.specialty }}</span>{% endif %}</div>
+            {% if d.working_hours %}
+              {# working_hours expected to be JSON; display simple list #}
+              <div class="text-sm text-slate-500">
+                {% set wh = d.working_hours %}
+                {% if wh is string %}
+                  {# attempt to show raw string if JSON parsing wasn't done server-side #}
+                  {{ wh }}
+                {% else %}
+                  {% for w in wh %}
+                    <div>{{ w.day }}: {{ w.from }} — {{ w.to }}</div>
+                  {% endfor %}
+                {% endif %}
+              </div>
+            {% endif %}
+          </li>
+        {% else %}
+          <li>No doctors listed</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% if services %}
+      <div class="mt-4">
+        <h3 class="font-semibold">Services</h3>
+        <ul class="list-disc list-inside text-sm text-slate-700">
+          {% for s in services %}
+            <li>{{ s }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    <div class="mt-6">
+      <h3 class="font-semibold">Location</h3>
+      <div class="w-full h-64 rounded overflow-hidden shadow mt-2">
+        {# Simple Google Maps embed by query (address). Replace with proper Maps JS when API key available #}
+        <iframe width="100%" height="100%" frameborder="0" style="border:0"
+          src="https://www.google.com/maps?q={{ map_query }}&output=embed" allowfullscreen></iframe>
+      </div>
+    </div>
+    <div class="mt-4">
+      <form method="post" action="/request" class="max-w-md">
+        <input type="hidden" name="clinic_id" value="{{ clinic.id }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="mb-3">
+          <label class="block text-sm font-medium">Requested start</label>
+          <input name="requested_start" type="datetime-local" class="border p-2 rounded w-full" required />
+        </div>
+        <div class="mb-3">
+          <label class="block text-sm font-medium">Requested end</label>
+          <input name="requested_end" type="datetime-local" class="border p-2 rounded w-full" required />
+        </div>
+        <div class="mb-3">
+          <label class="block text-sm font-medium">Reason (optional)</label>
+          <textarea name="reason" class="border p-2 rounded w-full" rows="3"></textarea>
+        </div>
+        <div>
+          <button class="bg-blue-600 text-white px-4 py-2 rounded">Request Appointment</button>
+        </div>
+      </form>
+
+      {# Reviews section: shows latest feedback and (optionally) lets logged-in
+         patients post a review. For now the form posts with standard POST and
+         reloads the page. #}
+      <div class="mt-6">
+        <h3 class="font-semibold mb-2">Reviews</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="md:col-span-2">
+            <div class="space-y-3">
+              {% for r in reviews %}
+                <div class="bg-slate-50 p-3 rounded">
+                  <div class="flex items-center justify-between mb-1">
+                    <div class="text-sm font-medium">{{ r.patient_name or 'Anonymous patient' }}</div>
+                    <div class="text-xs text-amber-500">
+                      {% for _ in range(r.rating) %}★{% endfor %}{% for _ in range(5 - r.rating) %}☆{% endfor %}
+                    </div>
+                  </div>
+                  {% if r.comment %}
+                    <div class="text-sm text-slate-700">{{ r.comment }}</div>
+                  {% endif %}
+                  <div class="mt-1 text-xs text-slate-400">{{ r.created_at }}</div>
+                </div>
+              {% else %}
+                <div class="text-sm text-slate-500">No reviews yet.</div>
+              {% endfor %}
+            </div>
+          </div>
+          <div>
+            <h4 class="font-semibold text-sm mb-1">Leave a review</h4>
+            <p class="text-xs text-slate-500 mb-2">Share your experience to help other patients choose confidently.</p>
+            <form method="post" action="{{ url_for('patient.create_review', clinic_id=clinic.id) }}">
+              <label class="block text-xs font-medium mb-1">Rating (1-5)</label>
+              <select name="rating" class="border p-2 rounded w-full text-sm mb-2">
+                {% for i in range(1,6) %}
+                  <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+              </select>
+              <label class="block text-xs font-medium mb-1">Comment (optional)</label>
+              <textarea name="comment" class="border p-2 rounded w-full text-sm mb-2" rows="3"></textarea>
+              <button class="bg-sky-600 text-white px-3 py-1 rounded text-sm w-full">Submit review</button>
+            </form>
+          </div>
+        </div>
+      </div>
+          {# patient_id is now always from session, not user input #}
+        </div>
+        <div class="mt-2">
+          <label class="block">Requested start</label>
+          <input name="requested_start" type="datetime-local" class="border p-2 rounded w-full" required />
+        </div>
+        <div class="mt-2">
+          <label class="block">Requested end</label>
+          <input name="requested_end" type="datetime-local" class="border p-2 rounded w-full" required />
+        </div>
+        <div class="mt-2">
+          <label class="block">Reason</label>
+          <textarea name="reason" class="border p-2 rounded"></textarea>
+        </div>
+        <div class="mt-2">
+          <button class="bg-blue-600 text-white px-4 py-2 rounded">Request Appointment</button>
+        </div>
+      </form>
+    </div>
+
+    {% if photos %}
+      <div class="mt-6">
+        <h3 class="font-semibold mb-2">Photos</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {% for p in photos %}
+            <img src="{{ p.file_path }}" alt="{{ p.caption or clinic.name }}" class="w-full h-32 object-cover rounded"/>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

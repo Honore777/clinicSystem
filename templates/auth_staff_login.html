@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section class="relative overflow-hidden rounded-2xl mb-12 shadow-xl">
+
+  <!-- Background -->
+  <div class="absolute inset-0 bg-gradient-to-br from-sky-900 via-blue-800 to-slate-900"></div>
+
+  <!-- Content -->
+  <div class="relative z-10 max-w-5xl mx-auto px-6 py-16">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+
+      <!-- LEFT SIDE -->
+      <div class="text-white space-y-5">
+        <h2 class="text-3xl md:text-4xl font-bold leading-tight">
+          Clinic staff access
+        </h2>
+
+        <p class="text-slate-200 text-base leading-relaxed">
+          Sign in to manage appointment requests, update clinic details, and coordinate your care team in one secure dashboard.
+        </p>
+
+        <div class="pt-2 space-y-1 text-sm text-slate-200">
+          <p>• Review and approve incoming appointment requests</p>
+          <p>• Keep your clinic information and photos up to date</p>
+          <p>• Manage staff accounts and roles</p>
+        </div>
+
+        <div class="pt-3 text-sm text-slate-300">
+          Need to list your clinic?
+          <a href="/clinic/onboard" class="text-sky-300 hover:text-white font-medium underline underline-offset-4 transition">
+            Start onboarding
+          </a>
+        </div>
+      </div>
+
+      <!-- RIGHT SIDE (FORM) -->
+      <div>
+        <div class="bg-white/95 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white/20">
+
+          <h3 class="text-xl font-semibold text-slate-800 mb-6">
+            Staff Sign In
+          </h3>
+
+          <form method="post" class="space-y-4">
+            {{ form.csrf_token }}
+
+            <!-- Email -->
+            <div>
+              <label class="block text-sm font-medium text-slate-600 mb-1">
+                Work Email
+              </label>
+              {{ form.email(class='w-full border border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 rounded-lg px-4 py-2.5 outline-none transition') }}
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label class="block text-sm font-medium text-slate-600 mb-1">
+                Password
+              </label>
+              {{ form.password(class='w-full border border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 rounded-lg px-4 py-2.5 outline-none transition') }}
+            </div>
+
+            <!-- Submit -->
+            <div class="pt-2">
+              {{ form.submit(class='w-full bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transition duration-200') }}
+            </div>
+
+            <div class="text-xs text-slate-500 text-center pt-2">
+              Having trouble signing in? Contact your clinic administrator.
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1 class="text-2xl font-bold mb-4">Staff Management</h1>
+  <div class="grid grid-cols-2 gap-6">
+    <div class="bg-white p-4 rounded shadow">
+      <h3 class="font-semibold mb-2">Create Staff</h3>
+      <form method="post">
+        {{ form.csrf_token }}
+        <div class="mb-2">{{ form.name.label }} {{ form.name(class='border p-2 rounded w-full') }}</div>
+        <div class="mb-2">{{ form.email.label }} {{ form.email(class='border p-2 rounded w-full') }}</div>
+        <div class="mb-2">{{ form.phone.label }} {{ form.phone(class='border p-2 rounded w-full') }}</div>
+        <div class="mb-2">{{ form.role.label }} {{ form.role(class='border p-2 rounded') }}</div>
+        <div class="mb-2">{{ form.clinic_id.label }} {{ form.clinic_id(class='border p-2 rounded') }}</div>
+        <div class="mb-2">{{ form.password.label }} {{ form.password(class='border p-2 rounded w-full') }}</div>
+        <div>{{ form.submit(class='bg-sky-600 text-white px-4 py-2 rounded') }}</div>
+      </form>
+    </div>
+    <div class="bg-white p-4 rounded shadow">
+      <h3 class="font-semibold mb-2">Existing Staff</h3>
+      <ul>
+        {% for s in staff_list %}
+          <li>{{ s.name }} — {{ s.email }} — {{ s.role }} {% if s.clinic_name %}— {{ s.clinic_name }}{% endif %}</li>
+        {% else %}
+          <li>No staff yet</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}

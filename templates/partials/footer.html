@@ -1,0 +1,48 @@
+<footer class="mt-12 bg-slate-50 border-t">
+  {# Main footer: several columns with links and contact info. #}
+  <div class="container mx-auto px-4 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div>
+        <div class="text-lg font-semibold text-slate-900">{{ (config.SITE_NAME if config is defined else 'ClinicSystem') }}</div>
+        <p class="text-sm text-slate-600 mt-2">Connecting patients with trusted clinics. Book appointments, read reviews, and manage bookings — all in one place.</p>
+      </div>
+
+      <div>
+        <div class="font-semibold mb-2">For clinics</div>
+        <ul class="text-sm text-slate-600 space-y-1">
+          <li><a href="/clinic/onboard" class="hover:underline">List your clinic</a></li>
+          <li><a href="/clinic/staff" class="hover:underline">Manage staff</a></li>
+          <li><a href="/admin" class="hover:underline">Admin console</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="font-semibold mb-2">Support</div>
+        <ul class="text-sm text-slate-600 space-y-1">
+          <li><a href="/help" class="hover:underline">Help center</a></li>
+          <li><a href="/contact" class="hover:underline">Contact us</a></li>
+          <li><a href="/notifications" class="hover:underline">Notifications</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="font-semibold mb-2">Legal & Contact</div>
+        <div class="text-sm text-slate-600">
+          <div>Email: support@example.com</div>
+          <div class="mt-1">Phone: +250 000 000</div>
+          <div class="mt-2"><a href="/terms" class="hover:underline">Terms</a> • <a href="/privacy" class="hover:underline">Privacy</a></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-8 border-t pt-6 flex flex-col md:flex-row items-center justify-between text-sm text-slate-500">
+      <div>© {{ (config.SITE_NAME if config is defined else 'ClinicSystem') }} — All rights reserved.</div>
+      <div class="mt-3 md:mt-0">
+        <span class="mr-4">Follow us:</span>
+        <a href="#" class="mr-2 hover:underline">Twitter</a>
+        <a href="#" class="mr-2 hover:underline">Facebook</a>
+        <a href="#" class="hover:underline">LinkedIn</a>
+      </div>
+    </div>
+  </div>
+</footer>

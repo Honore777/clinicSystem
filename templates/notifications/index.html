@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+  {# Simple notifications feed for the logged-in user. #}
+  <h1 class="text-2xl font-bold mb-4">Notifications</h1>
+  <div class="space-y-4">
+    {% for n in notifications %}
+      <div class="flex gap-4 items-start p-4 bg-white rounded-lg shadow-sm border {{ 'border-sky-200' if not n.read_at else 'border-slate-100' }}">
+        <div class="flex-none mt-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sky-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a4 4 0 00-4 4v2.586L5.293 11.293A1 1 0 006 13h8a1 1 0 00.707-1.707L14 8.586V6a4 4 0 00-4-4z"/><path d="M4 14a2 2 0 002 2h8a2 2 0 002-2v-1H4v1z"/></svg>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center justify-between">
+            <div class="text-sm font-medium text-slate-800">{{ n.message }}</div>
+            {% if not n.read_at %}
+              <span class="ml-3 inline-block bg-sky-600 text-white text-xs px-2 py-0.5 rounded">New</span>
+            {% endif %}
+          </div>
+          <div class="text-xs text-slate-500 mt-1">
+            {% if n.patient_name %}
+              Patient: {{ n.patient_name }}
+            {% elif n.clinic_name %}
+              Clinic: {{ n.clinic_name }}
+            {% endif %}
+          </div>
+          <div class="text-xs text-slate-400 mt-2">{{ n.created_at }}</div>
+        </div>
+      </div>
+    {% else %}
+      <div class="p-4 text-sm text-slate-500 bg-white rounded-lg shadow-sm">No notifications yet.</div>
+    {% endfor %}
+  </div>
+{% endblock %}

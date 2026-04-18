@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+  {# Clinic staff management screen.
+     - Only clinic admins (managers) should access this route.
+     - Lets the admin create users who can handle appointments for this clinic. #}
+  <h1 class="text-2xl font-bold mb-4">Clinic Users</h1>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div>
+      <h2 class="text-lg font-semibold mb-2">Create a new user</h2>
+      <p class="text-sm text-slate-600 mb-3">Users can log in as staff and manage appointments for this clinic.</p>
+      <form method="post">
+        {{ form.csrf_token }}
+        <div class="mb-2">
+          <label class="block text-sm font-medium">Name</label>
+          {{ form.name(class='border p-2 rounded w-full') }}
+        </div>
+        <div class="mb-2">
+          <label class="block text-sm font-medium">Email</label>
+          {{ form.email(class='border p-2 rounded w-full') }}
+        </div>
+        <div class="mb-2">
+          <label class="block text-sm font-medium">Phone (optional)</label>
+          {{ form.phone(class='border p-2 rounded w-full') }}
+        </div>
+        <div class="mb-2">
+          <label class="block text-sm font-medium">Password</label>
+          {{ form.password(class='border p-2 rounded w-full') }}
+        </div>
+        <div class="mt-3">
+          {{ form.submit(class='bg-sky-600 text-white px-4 py-2 rounded') }}
+        </div>
+      </form>
+    </div>
+    <div>
+      <h2 class="text-lg font-semibold mb-2">Existing users</h2>
+      <p class="text-sm text-slate-600 mb-3">These users belong to your clinic and can log in via the staff login.</p>
+      <div class="bg-white rounded shadow divide-y">
+        {% for s in staff_list %}
+          <div class="p-3 flex items-center justify-between">
+            <div>
+              <div class="font-medium text-sm">{{ s.name }}</div>
+              <div class="text-xs text-slate-500">{{ s.email }} • {{ s.phone or 'no phone' }}</div>
+            </div>
+            <span class="text-xs uppercase tracking-wide text-slate-500">{{ s.role }}</span>
+          </div>
+        {% else %}
+          <div class="p-3 text-sm text-slate-500">No users yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

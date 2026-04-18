@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% block content %}
+
+  {# Featured Clinics Section #}
+  {% if featured_clinics %}
+  <section class="mb-12">
+    <div class="max-w-6xl mx-auto mb-6 flex items-end justify-between">
+      <div>
+        <h2 class="text-xl md:text-2xl font-semibold text-slate-900">Featured Clinics</h2>
+        <p class="mt-1 text-sm text-slate-600">Top-rated and trusted clinics, handpicked for you.</p>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for c in featured_clinics %}
+      <article class="bg-white rounded-xl border border-slate-100 shadow-md hover:shadow-lg transition overflow-hidden flex flex-col">
+        {% if c.primary_photo %}
+          <img loading="lazy" src="{{ c.primary_photo }}" alt="{{ c.name }}" class="w-full h-48 object-cover"/>
+        {% else %}
+          <div class="w-full h-48 bg-slate-100 flex items-center justify-center text-slate-400 text-xs">No image available</div>
+        {% endif %}
+        <div class="p-5 flex-1 flex flex-col">
+          <h3 class="font-bold text-lg text-slate-900 mb-1">{{ c.name }}</h3>
+          <div class="flex items-center gap-2 text-xs text-sky-700 mb-1">
+            <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            {{ c.city_name }}
+          </div>
+          <div class="text-xs text-slate-500 mb-2">{{ c.address }}</div>
+          {% if c.avg_rating %}
+            <div class="flex items-center gap-1 text-amber-500 text-xs mb-2">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.05 9.394c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.967z"/></svg>
+              {{ '%.1f' % c.avg_rating }} / 5
+            </div>
+          {% endif %}
+          {% if c.services and c.services|length > 0 %}
+            <div class="text-xs text-slate-600 mb-2 line-clamp-2">Services: {{ c.services|join(' · ') }}</div>
+          {% endif %}
+          <div class="mt-auto flex justify-between items-center">
+            <a class="inline-block text-white bg-sky-600 px-4 py-2 rounded text-xs hover:bg-sky-700 font-semibold" href="/clinic/{{ c.id }}">Book Now</a>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {# Hero section with rotating background images and value statements.
+     - Uses Alpine.js for a simple slideshow that swaps images and text.
+     - Images live under static/images; update the list if you add more.
+     - This is the first impression, similar to a marketplace landing page. #}
+  <section x-data="{
+            slides: [
+              { src: '/static/images/clinic%20system%20photo1.jfif', text: 'Your health, your priority.' },
+              { src: '/static/images/clinicsystem%20phot2.jfif', text: 'Your time, your value.' },
+              { src: '/static/images/clinic%20system%20photo3.jfif', text: 'Your care, your comfort.' },
+              { src: '/static/images/clinic%20system%20photo4.jfif', text: 'Your wellness, your wealth.' },
+              { src: '/static/images/clinic%20system%20phot5.jfif', text: 'Trusted clinics, one place.' }
+            ],
+            current: 0,
+            init() {
+              // rotate every 5 seconds
+              setInterval(() => {
+                this.current = (this.current + 1) % this.slides.length
+              }, 5000)
+            }
+          }"
+          class="relative overflow-hidden rounded-2xl mb-12 bg-slate-900 text-white">
+    <!-- Background slideshow images -->
+    <template x-for="(slide, index) in slides" :key="index">
+      <div x-show="current === index" x-transition.opacity.duration.700ms
+           class="absolute inset-0">
+        <img :src="slide.src" alt="Clinic background" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-slate-900/60"></div>
+      </div>
+    </template>
+
+    <!-- Hero content foreground -->
+    <div class="relative z-10 px-6 py-12 sm:px-10 sm:py-16 md:px-16 md:py-20 flex flex-col items-center text-center">
+      <p class="text-sm font-semibold tracking-wide uppercase text-sky-200">Book clinics with confidence</p>
+      <h1 class="mt-3 text-3xl sm:text-4xl md:text-5xl font-bold max-w-3xl">
+        <span x-text="slides[current].text"></span>
+      </h1>
+      <p class="mt-3 max-w-2xl text-sm sm:text-base text-slate-100">
+        Compare clinics, see services and photos, and request appointments in a few clicks.
+      </p>
+      <form method="get" role="search" aria-label="Search clinics" class="mt-6 w-full max-w-xl flex flex-col sm:flex-row gap-3">
+        {# `q` value is passed from the view so we don't read request here #}
+        <input type="search" name="q" aria-label="Search clinics or city" value="{{ q or '' }}"
+               placeholder="Search by clinic, service, or city"
+               class="flex-1 border border-slate-200/80 rounded px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-300" />
+        <div class="flex gap-2 justify-center sm:justify-start">
+          <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white px-5 py-3 rounded shadow">
+            Find clinics
+          </button>
+          <a href="/clinic/onboard" class="px-4 py-3 rounded border border-white/70 text-white hover:bg-white/10 text-sm">
+            List your clinic
+          </a>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  {# Top Cities Section #}
+  {% if city_list %}
+  <section class="mb-12">
+    <div class="max-w-6xl mx-auto mb-6 flex items-end justify-between">
+      <div>
+        <h2 class="text-xl md:text-2xl font-semibold text-slate-900">Top Cities</h2>
+        <p class="mt-1 text-sm text-slate-600">Browse clinics by city across Rwanda.</p>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+      {% for city_name in city_list %}
+        {% set is_featured = city_name in ['Kigali', 'Musanze', 'Rubavu'] %}
+        {% set is_active = city and city_name == city %}
+        <a href="/?city={{ city_name }}"
+           class="relative overflow-hidden rounded-2xl group shadow-md border {{ 'border-sky-400 ring-2 ring-sky-300' if is_active else 'border-sky-100' }} {{ 'bg-gradient-to-br from-sky-700 via-sky-500 to-sky-800 text-white' if is_featured else 'bg-sky-50 hover:bg-sky-100 text-sky-800' }} min-h-[120px] sm:min-h-[140px]">
+          <div class="absolute inset-0 opacity-0 group-hover:opacity-10 bg-[radial-gradient(circle_at_top,_white,_transparent_60%)] transition"></div>
+          <div class="relative px-7 py-6 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="h-12 w-12 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
+                <svg class="w-6 h-6 {{ 'text-white' if is_featured else 'text-sky-600' }}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              </div>
+              <div>
+                <div class="font-semibold text-lg leading-snug">{{ city_name }}</div>
+                <div class="text-sm {{ 'text-sky-100' if is_featured else 'text-slate-500' }}">Clinics in {{ city_name }}</div>
+              </div>
+            </div>
+            <span class="text-sm font-semibold {{ 'text-sky-100' if is_featured else 'text-sky-700' }}">View</span>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  {# How it works: concise, professional explanation. #}
+  <section class="mb-12">
+    <div class="max-w-6xl mx-auto">
+      <div class="mb-6 md:flex md:items-end md:justify-between">
+        <div>
+          <h2 class="text-xl md:text-2xl font-semibold text-slate-900">How it works</h2>
+          <p class="mt-1 text-sm text-slate-600">A simple flow designed for busy patients and clinic teams.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+          <h3 class="font-semibold text-slate-900">1. Search and compare</h3>
+          <p class="text-sm text-slate-600 mt-2">Browse clinics by city, specialization, and services. Review photos, opening hours, and location before you decide.</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+          <h3 class="font-semibold text-slate-900">2. Send a request</h3>
+          <p class="text-sm text-slate-600 mt-2">Submit an appointment request in a few clicks. Clinics review, confirm, or propose a new time from their dashboard.</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+          <h3 class="font-semibold text-slate-900">3. Attend with confidence</h3>
+          <p class="text-sm text-slate-600 mt-2">Arrive knowing what to expect. After your visit, you can leave a review to help other patients make informed choices.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# Clinics grouped by city, similar to a directory. #}
+  {% if clinics_by_city %}
+    <section class="mb-4">
+      <div class="max-w-6xl mx-auto flex items-baseline justify-between mb-4">
+        <h2 class="text-xl md:text-2xl font-semibold text-slate-900">Browse clinics by city</h2>
+        <p class="text-xs text-slate-500">Showing {{ clinics_by_city|length }} cit{{ 'y' if clinics_by_city|length == 1 else 'ies' }}</p>
+      </div>
+
+      <div class="max-w-6xl mx-auto">
+        {% for city, clinics in clinics_by_city.items() %}
+          <div class="mb-8">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-sky-50 text-sky-700 border border-sky-100">{{ city }}</span>
+              </div>
+              <span class="text-xs text-slate-500">{{ clinics|length }} clinic{{ '' if clinics|length == 1 else 's' }}</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {% for c in clinics %}
+                <article class="bg-white rounded-lg border border-slate-100 shadow-md hover:shadow-lg transition overflow-hidden flex flex-col">
+                  {% if c.primary_photo %}
+                    <img loading="lazy" src="{{ c.primary_photo }}" alt="{{ c.name }}" class="w-full h-40 object-cover"/>
+                  {% else %}
+                    <div class="w-full h-40 bg-slate-100 flex items-center justify-center text-slate-400 text-xs">No image available</div>
+                  {% endif %}
+                  <div class="p-4 flex-1 flex flex-col">
+                    <h3 class="font-bold text-base text-slate-900 mb-1">{{ c.name }}</h3>
+                    <div class="flex items-center gap-2 text-xs text-sky-700 mb-1">
+                      <svg class="w-4 h-4 text-sky-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                      {{ c.city_name }}
+                    </div>
+                    <div class="text-xs text-slate-500 mb-2">{{ c.address }}</div>
+                    {% if c.avg_rating %}
+                      <div class="flex items-center gap-1 text-amber-500 text-xs mb-2">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.38-2.455a1 1 0 00-1.175 0l-3.38 2.455c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.05 9.394c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.967z"/></svg>
+                        {{ '%.1f' % c.avg_rating }} / 5
+                      </div>
+                    {% endif %}
+                    {% if c.services %}
+                      <div class="text-xs text-slate-600 mb-2 line-clamp-2">Services: {{ c.services|join(', ') if c.services is iterable and not string else c.services }}</div>
+                    {% endif %}
+                    <div class="mt-auto flex justify-between items-center">
+                      <span class="text-xs text-slate-500">View full clinic profile</span>
+                      <a class="inline-block text-white bg-sky-600 px-3 py-1 rounded text-xs hover:bg-sky-700 font-semibold" href="/clinic/{{ c.id }}">Open</a>
+                    </div>
+                  </div>
+                </article>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% else %}
+    <div class="text-center text-slate-500">No clinics found.</div>
+  {% endif %}
+{% endblock %}

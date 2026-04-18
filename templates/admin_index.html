@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1 class="text-2xl font-bold">Admin</h1>
+  <ul class="list-disc pl-6">
+    <li><a href="{{ url_for('admin.clinics') }}" class="text-sky-600">Manage Clinics</a></li>
+    <li><a href="{{ url_for('admin.staff') }}" class="text-sky-600">Manage Staff</a></li>
+  </ul>
+{% endblock %}

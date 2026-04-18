@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Discover clinics, view services, and book appointments nearby.">
+  <meta name="theme-color" content="#0b63d6">
+  <title>Clinic System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/htmx.org@1.9.2/dist/htmx.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    /* quick brand variables — templates use Tailwind classes (sky/blue)
+       keeping these for colors referenced by custom CSS if needed */
+    :root {
+      --brand-500: #0b63d6;
+      --brand-600: #0952b4;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  {% include 'partials/header.html' %}
+
+  <main class="container mx-auto p-6">
+    {# show flash messages first so user sees immediate feedback #}
+    {% include 'partials/messages.html' %}
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include 'partials/footer.html' %}
+</body>
+</html>
