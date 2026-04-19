@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Reports</h1>
+    <a href="{{ url_for('admin.index') }}" class="text-sm text-slate-600 hover:underline">Back to dashboard</a>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white p-4 rounded shadow border-t-2 border-sky-400">
+      <div class="text-sm text-slate-500">Total Appointments</div>
+      <div class="text-2xl font-bold">{{ totals.total_appointments }}</div>
+      <div class="text-xs mt-2"><a href="{{ url_for('reports.run_report') }}?name=appointments_per_clinic" class="text-sky-600">View per clinic</a></div>
+    </div>
+
+    <div class="bg-white p-4 rounded shadow border-t-2 border-emerald-400">
+      <div class="text-sm text-slate-500">Total Patients</div>
+      <div class="text-2xl font-bold">{{ totals.total_patients }}</div>
+      <div class="text-xs mt-2"><a href="{{ url_for('reports.run_report') }}?name=number_of_patients" class="text-sky-600">View details</a></div>
+    </div>
+
+    <div class="bg-white p-4 rounded shadow border-t-2 border-amber-400">
+      <div class="text-sm text-slate-500">Active Clinics</div>
+      <div class="text-2xl font-bold">{{ totals.active_clinics }}</div>
+      <div class="text-xs mt-2"><a href="{{ url_for('admin.clinics') }}" class="text-sky-600">Manage clinics</a></div>
+    </div>
+
+    <div class="bg-white p-4 rounded shadow border-t-2 border-red-400">
+      <div class="text-sm text-slate-500">Pending Requests</div>
+      <div class="text-2xl font-bold">{{ totals.pending_requests }}</div>
+      <div class="text-xs mt-2"><a href="{{ url_for('admin.index') }}" class="text-sky-600">View requests</a></div>
+    </div>
+  </div>
+
+  <div class="bg-white p-4 rounded shadow">
+    <h2 class="text-lg font-semibold mb-3">Top Clinics by Requests</h2>
+    <div class="overflow-x-auto">{{ top_clinics_html|safe }}</div>
+    <div class="mt-3 text-right"><a href="{{ url_for('reports.run_report') }}?name=top_clinics_by_requests" class="text-sky-600">View full table</a></div>
+  </div>
+{% endblock %}

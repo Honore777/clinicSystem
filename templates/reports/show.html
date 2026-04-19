@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">{{ title }}</h1>
+    <a href="{{ url_for('reports.index') }}" class="text-sm text-slate-600 hover:underline">Back to reports</a>
+  </div>
+
+  <div class="bg-white p-4 rounded shadow">
+    {% if error %}
+      <div class="text-red-600">Error: {{ error }}</div>
+    {% elif table %}
+      <div class="overflow-x-auto">{{ table|safe }}</div>
+    {% else %}
+      <div class="text-slate-600">No data</div>
+    {% endif %}
+  </div>
+{% endblock %}

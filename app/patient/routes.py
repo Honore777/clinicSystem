@@ -228,6 +228,81 @@ def create_review(clinic_id):
     return redirect(url_for('patient.clinic_profile', clinic_id=clinic_id))
 
 
+@bp.route('/patient/profile', methods=['GET', 'POST'])
+@login_required_patient
+def edit_profile():
+    # Simple profile edit page for logged-in patients
+    from flask import g
+    from .forms import PatientProfileForm
+
+    patient = g.patient
+    form = PatientProfileForm()
+
+    # populate city choices
+    cities = db.query_db('SELECT id, name FROM city ORDER BY name') or []
+    form.city_id.choices = [(0, '— none —')] + [(c['id'], c['name']) for c in cities]
+
+    if request.method == 'GET':
+        form.name.data = patient.get('name')
+        form.phone.data = patient.get('phone')
+        form.email.data = patient.get('email')
+        form.preferred_language.data = patient.get('preferred_language') or 'rw'
+        form.city_id.data = patient.get('city_id') or 0
+
+    if form.validate_on_submit():
+        try:
+            city_id = form.city_id.data or None
+            if city_id == 0:
+                city_id = None
+            db.query_db(
+                'UPDATE patient SET name=%s, phone=%s, email=%s, preferred_language=%s, city_id=%s WHERE id = %s',
+                (form.name.data, form.phone.data, form.email.data or None, form.preferred_language.data, city_id, patient['id']),
+                commit=True,
+            )
+            flash('Profile updated')
+            return redirect(url_for('patient.dashboard'))
+        except Exception as e:
+            flash('Failed to update profile: ' + str(e))
+
+    return render_template('patient/edit_profile.html', form=form)
+
+
+@bp.route('/request/<int:req_id>/cancel', methods=['GET', 'POST'])
+@login_required_patient
+def cancel_request(req_id):
+    """Allow a patient to cancel their appointment request with a required message."""
+    pid = session.get('patient_id')
+    if not pid:
+        return redirect(url_for('auth.login'))
+
+    req = db.query_db('SELECT * FROM appointment_request WHERE id = %s', (req_id,), one=True)
+    if not req or req.get('patient_id') != pid:
+        flash('Request not found or not authorized')
+        return redirect(url_for('patient.dashboard'))
+
+    if request.method == 'POST':
+        message = (request.form.get('message') or '').strip()
+        if not message:
+            flash('Please provide a cancellation message')
+            return render_template('patient/cancel_request.html', request=req)
+        try:
+            # Remove any confirmed appointment tied to this request
+            db.query_db('DELETE FROM appointment WHERE appointment_request_id = %s', (req_id,), commit=True)
+            # Mark request as declined (use existing status)
+            db.query_db("UPDATE appointment_request SET status = 'declined' WHERE id = %s", (req_id,), commit=True)
+            # Notify clinic and patient
+            if req.get('clinic_id'):
+                create_notification(recipient_type='clinic', recipient_id=req['clinic_id'], message=f"Patient canceled request #{req_id}: {message}")
+            create_notification(recipient_type='patient', recipient_id=pid, message=f"You canceled request #{req_id}: {message}")
+            flash('Appointment request canceled')
+            return redirect(url_for('patient.dashboard'))
+        except Exception as e:
+            flash('Failed to cancel request: ' + str(e))
+            return redirect(url_for('patient.dashboard'))
+
+    return render_template('patient/cancel_request.html', request=req)
+
+
 @bp.route('/patient/dashboard')
 def dashboard():
     # patient dashboard: show recent requests and appointments for logged-in patient

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Edit Profile</h1>
+    <a href="{{ url_for('patient.dashboard') }}" class="text-sm text-slate-600 hover:underline">Back to dashboard</a>
+  </div>
+
+  <div class="bg-white p-6 rounded-xl shadow max-w-2xl">
+    <form method="post">
+      {{ form.hidden_tag() }}
+
+      <div class="mb-4">
+        {{ form.name.label(class_='block text-sm text-slate-700') }}
+        {{ form.name(class_='w-full border p-2 rounded') }}
+      </div>
+
+      <div class="mb-4">
+        {{ form.phone.label(class_='block text-sm text-slate-700') }}
+        {{ form.phone(class_='w-full border p-2 rounded') }}
+      </div>
+
+      <div class="mb-4">
+        {{ form.email.label(class_='block text-sm text-slate-700') }}
+        {{ form.email(class_='w-full border p-2 rounded') }}
+      </div>
+
+      <div class="mb-4 grid grid-cols-2 gap-4">
+        <div>
+          {{ form.preferred_language.label(class_='block text-sm text-slate-700') }}
+          {{ form.preferred_language(class_='w-full border p-2 rounded') }}
+        </div>
+        <div>
+          {{ form.city_id.label(class_='block text-sm text-slate-700') }}
+          {{ form.city_id(class_='w-full border p-2 rounded') }}
+        </div>
+      </div>
+
+      <div class="mt-6">
+        {{ form.submit(class_='px-4 py-2 bg-sky-600 text-white rounded') }}
+      </div>
+    </form>
+  </div>
+{% endblock %}

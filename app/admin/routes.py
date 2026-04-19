@@ -70,7 +70,18 @@ def clinics():
 def verify_clinic(clinic_id):
     db.query_db('UPDATE clinic SET is_verified = 1 WHERE id = %s', (clinic_id,), commit=True)
     flash('Clinic verified')
-    return redirect(url_for('admin.clinics'))
+    return redirect(url_for('admin.index'))
+
+
+@bp.route('/clinics/<int:clinic_id>/delete', methods=['POST'])
+@superadmin_required
+def delete_clinic(clinic_id):
+    try:
+        db.query_db('DELETE FROM clinic WHERE id = %s', (clinic_id,), commit=True)
+        flash('Clinic deleted')
+    except Exception as e:
+        flash('Failed to delete clinic: ' + str(e))
+    return redirect(url_for('admin.index'))
 
 
 @bp.route('/staff', methods=['GET', 'POST'])

@@ -2,7 +2,10 @@
 {% block content %}
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold">My Dashboard</h1>
-    <a href="/clinic" class="text-sm text-slate-600 hover:underline">Browse clinics</a>
+    <div class="flex items-center gap-4">
+      <a href="{{ url_for('patient.edit_profile') }}" class="text-sm text-slate-600 hover:underline">Edit profile</a>
+      <a href="/clinic" class="text-sm text-slate-600 hover:underline">Browse clinics</a>
+    </div>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -22,6 +25,11 @@
               <div class="text-right">
                 <div class="inline-block px-3 py-1 text-xs font-semibold rounded {{ 'bg-yellow-200 text-yellow-800' if r.status == 'pending' else 'bg-green-200 text-green-800' if r.status == 'approved' else 'bg-red-200 text-red-800' }}">{{ r.status|capitalize }}</div>
                 <div class="text-xs text-slate-400 mt-2">Submitted: {{ r.created_at }}</div>
+                  {% if r.status == 'pending' %}
+                    <div class="mt-2">
+                      <a href="{{ url_for('patient.cancel_request', req_id=r.id) }}" class="inline-block mt-2 text-sm text-red-600 hover:underline">Cancel request</a>
+                    </div>
+                  {% endif %}
               </div>
             </div>
           {% else %}
