@@ -11,6 +11,7 @@
           </div>
           <div class="space-x-2">
             <form method="post" action="/clinic/request/{{ r.id }}/approve" hx-post="/clinic/request/{{ r.id }}/approve" hx-swap="outerHTML">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button class="bg-green-600 text-white px-3 py-1 rounded">Approve</button>
             </form>
           </div>

@@ -28,6 +28,13 @@ def onboard():
     # populate city choices
     cities = db.query_db('SELECT id, name FROM city ORDER BY name') or []
     form.city_id.choices = [(c['id'], c['name']) for c in cities]
+    # Normalize website input when submitted without a scheme so the URL
+    # validator accepts values like 'www.example.com'. Do this before
+    # `validate_on_submit()` so the form sees the normalized value.
+    if request.method == 'POST':
+        raw_site = request.form.get('website')
+        if raw_site and not raw_site.startswith(('http://', 'https://')):
+            form.website.data = 'https://' + raw_site
     if form.validate_on_submit():
         name = form.name.data
         slug = form.slug.data or name.lower().replace(' ', '-')
@@ -95,6 +102,17 @@ def onboard():
         except Exception as e:
             flash('Failed to create clinic: ' + str(e))
             return redirect(url_for('clinic.onboard'))
+    # If POST and validation failed, show concise errors so the user knows
+    # what to fix (templates don't show WTForms errors inline by default).
+    if request.method == 'POST' and not form.validate():
+        # aggregate errors
+        errs = []
+        for f, errors in form.errors.items():
+            for e in errors:
+                errs.append(f"{f}: {e}")
+        if errs:
+            flash('Please fix the form errors: ' + '; '.join(errs))
+
     # template placed under templates/clinic/clinic_onboard.html
     return render_template('clinic/clinic_onboard.html', form=form)
 
@@ -225,36 +243,51 @@ def manage_staff():
 @role_required('clinicadmin', 'staff', 'superadmin')
 def approve(req_id):
     # Approval handler: checks for conflicts and, if none, creates an
-    # appointment and marks the request as approved.
+    # appointment and marks the request as approved. Responds with
+    # a flash+redirect for normal requests, or a small HTML fragment
+    # when called via HTMX so the UI can update in-place.
     req = db.query_db('SELECT * FROM appointment_request WHERE id = %s', (req_id,), one=True)
     if not req:
-        return ('not found', 404)
+        msg = 'Appointment request not found.'
+        if request.headers.get('HX-Request'):
+            return render_template('clinic/_action_result.html', message=msg, status='error'), 404
+        flash(msg)
+        return redirect(url_for('clinic.dashboard'))
+
     # Basic conflict check: ensure no existing confirmed appointment overlaps
     start = req['requested_start']
     end = req['requested_end']
     doctor_id = req['doctor_id']
     clinic_id = req['clinic_id']
-    # Build conflict query; if doctor_id is NULL, check clinic-level availability
+
     if doctor_id:
         conflict_sql = ('SELECT COUNT(1) as cnt FROM appointment '
                         'WHERE clinic_id = %s AND doctor_id = %s '
                         'AND NOT (confirmed_end <= %s OR confirmed_start >= %s)')
-        cnt = db.query_db(conflict_sql, (clinic_id, doctor_id, start, end), one=True)['cnt']
+        cnt_row = db.query_db(conflict_sql, (clinic_id, doctor_id, start, end), one=True)
+        cnt = cnt_row.get('cnt') if isinstance(cnt_row, dict) else (cnt_row[0] if cnt_row else 0)
     else:
         conflict_sql = ('SELECT COUNT(1) as cnt FROM appointment '
                         'WHERE clinic_id = %s '
                         'AND NOT (confirmed_end <= %s OR confirmed_start >= %s)')
-        cnt = db.query_db(conflict_sql, (clinic_id, start, end), one=True)['cnt']
+        cnt_row = db.query_db(conflict_sql, (clinic_id, start, end), one=True)
+        cnt = cnt_row.get('cnt') if isinstance(cnt_row, dict) else (cnt_row[0] if cnt_row else 0)
 
     if cnt and int(cnt) > 0:
-        # conflict detected
-        return ('conflict', 409)
+        msg = 'This time conflicts with an existing appointment; please choose a different slot.'
+        if request.headers.get('HX-Request'):
+            return render_template('clinic/_action_result.html', message=msg, status='conflict'), 409
+        flash(msg)
+        return redirect(url_for('clinic.dashboard'))
 
-    # create appointment and update status atomically
     # Ensure staff is authorized for this clinic (unless superadmin)
     staff = getattr(g, 'staff', None)
     if staff and staff.get('role') != 'superadmin' and staff.get('clinic_id') != clinic_id:
-        return ('forbidden', 403)
+        msg = 'You are not authorized to approve requests for this clinic.'
+        if request.headers.get('HX-Request'):
+            return render_template('clinic/_action_result.html', message=msg, status='forbidden'), 403
+        flash(msg)
+        return redirect(url_for('clinic.dashboard'))
 
     insert_sql = 'INSERT INTO appointment (appointment_request_id, clinic_id, doctor_id, confirmed_start, confirmed_end) VALUES (%s,%s,%s,%s,%s)'
     try:
@@ -274,14 +307,23 @@ def approve(req_id):
                 recipient_id=clinic_id,
                 appointment_id=None,
                 appointment_request_id=req_id,
-                message='You approved an appointment request.',
+                message='An appointment request was approved.',
             )
         except Exception:
             # do not roll back booking if notifications fail
             pass
     except Exception as e:
-        return (str(e), 500)
-    return ('ok', 200)
+        msg = 'Failed to approve appointment: ' + str(e)
+        if request.headers.get('HX-Request'):
+            return render_template('clinic/_action_result.html', message=msg, status='error'), 500
+        flash(msg)
+        return redirect(url_for('clinic.dashboard'))
+
+    success_msg = 'Appointment request approved.'
+    if request.headers.get('HX-Request'):
+        return render_template('clinic/_action_result.html', message=success_msg, status='approved'), 200
+    flash(success_msg)
+    return redirect(url_for('clinic.dashboard'))
 
 
 @bp.route('/request/<int:req_id>/decline', methods=['POST'])
@@ -295,12 +337,20 @@ def decline(req_id):
 
     req = db.query_db('SELECT * FROM appointment_request WHERE id = %s', (req_id,), one=True)
     if not req:
-        return ('not found', 404)
+        msg = 'Appointment request not found.'
+        if request.headers.get('HX-Request'):
+            return render_template('clinic/_action_result.html', message=msg, status='error'), 404
+        flash(msg)
+        return redirect(url_for('clinic.dashboard'))
 
     staff = getattr(g, 'staff', None)
     clinic_id = req['clinic_id']
     if staff and staff.get('role') != 'superadmin' and staff.get('clinic_id') != clinic_id:
-        return ('forbidden', 403)
+        msg = 'You are not authorized to decline requests for this clinic.'
+        if request.headers.get('HX-Request'):
+            return render_template('clinic/_action_result.html', message=msg, status='forbidden'), 403
+        flash(msg)
+        return redirect(url_for('clinic.dashboard'))
 
     db.query_db('UPDATE appointment_request SET status = %s WHERE id = %s', ('declined', req_id), commit=True)
 
@@ -315,9 +365,13 @@ def decline(req_id):
             recipient_type='clinic',
             recipient_id=clinic_id,
             appointment_request_id=req_id,
-            message='You declined an appointment request.',
+            message='An appointment request was declined.',
         )
     except Exception:
         pass
 
-    return ('ok', 200)
+    success_msg = 'Appointment request declined.'
+    if request.headers.get('HX-Request'):
+        return render_template('clinic/_action_result.html', message=success_msg, status='declined'), 200
+    flash(success_msg)
+    return redirect(url_for('clinic.dashboard'))

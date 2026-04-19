@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1 class="text-2xl font-bold mb-4">Report</h1>
+  <div class="mb-3 text-sm text-slate-600">SQL: <code>{{ sql }}</code></div>
+  <div class="bg-white rounded p-4 overflow-auto">{{ table_html | safe }}</div>
+{% endblock %}

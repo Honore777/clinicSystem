@@ -40,7 +40,10 @@ def index():
         {where_clause}
         ORDER BY ct.name ASC, c.created_at DESC
         LIMIT 200'''
-    rows = db.query_db(sql, tuple(params) if params else None) or []
+    # pass an empty tuple when no params to avoid passing `None` into
+    # cursor.execute(query, params) which can behave differently across
+    # DB drivers/environments
+    rows = db.query_db(sql, tuple(params) if params else (),) or []
     # Parse services field for each clinic (JSON or comma-separated string, but avoid splitting every letter)
     import json
     for row in rows:
@@ -69,6 +72,21 @@ def index():
          ORDER BY (avg_rating IS NULL), avg_rating DESC, c.created_at DESC
          LIMIT 6'''
     featured_clinics = db.query_db(featured_sql) or []
+
+    # Parse `services` for featured clinics the same way we parse the main
+    # clinics list above so templates receive a list instead of a raw string.
+    import json
+    for c in featured_clinics:
+        services = c.get('services')
+        parsed = []
+        if services:
+            try:
+                parsed = json.loads(services) if isinstance(services, str) and services.strip().startswith('[') else services
+                if isinstance(parsed, str):
+                    parsed = [s.strip() for s in parsed.split(',') if s.strip()]
+            except Exception:
+                parsed = [s.strip() for s in services.split(',') if s.strip()]
+        c['services'] = parsed if isinstance(parsed, list) else []
 
     # List of all cities with clinics (plus key featured cities like Kigali/Musanze/Rubavu)
     cities_sql = '''

@@ -3,3 +3,4 @@ PyMySQL>=1.0
 Flask-WTF>=1.0
 WTForms>=3.0
 python-dotenv>=1.0
+pandas>=2.0

@@ -5,6 +5,9 @@
     <div class="md:col-span-2">
       <label class="block text-sm text-slate-700">Clinic name</label>
       {{ form.name(class='w-full border rounded px-3 py-2 mt-1') }}
+      {% if form.name.errors %}
+        <div class="text-rose-600 text-sm mt-1">{{ form.name.errors[0] }}</div>
+      {% endif %}
     </div>
 
     <div>
@@ -15,6 +18,9 @@
     <div>
       <label class="block text-sm text-slate-700">City</label>
       {{ form.city_id(class='w-full border rounded px-3 py-2 mt-1') }}
+      {% if form.city_id.errors %}
+        <div class="text-rose-600 text-sm mt-1">{{ form.city_id.errors[0] }}</div>
+      {% endif %}
     </div>
 
     <div>
@@ -35,6 +41,9 @@
     <div>
       <label class="block text-sm text-slate-700 mt-2">Website</label>
       {{ form.website(class='w-full border rounded px-3 py-2 mt-1') }}
+      {% if form.website.errors %}
+        <div class="text-rose-600 text-sm mt-1">{{ form.website.errors[0] }}</div>
+      {% endif %}
     </div>
 
     <div class="md:col-span-2">

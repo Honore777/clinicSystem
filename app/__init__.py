@@ -42,12 +42,14 @@ def create_app():
     from app.admin.routes import bp as admin_bp
     from app.auth.routes import bp as auth_bp
     from app.notifications_routes import bp as notifications_bp
+    from app.reports.routes import bp as reports_bp
 
     app.register_blueprint(patient_bp)
     app.register_blueprint(clinic_bp, url_prefix='/clinic')
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(notifications_bp)
+    app.register_blueprint(reports_bp)
 
     # Inject unread notification count into templates so header can display a bell badge
     @app.context_processor

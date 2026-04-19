@@ -76,8 +76,12 @@ def staff_login():
         if not staff or not check_password_hash(staff['password_hash'], password):
             flash('Invalid credentials')
             return redirect(url_for('auth.staff_login'))
+        # Establish session and redirect based on role
+        role = (staff.get('role') or '').lower()
         session.clear()
         session['staff_id'] = staff['id']
         session['staff_role'] = staff.get('role')
+        if role == 'superadmin':
+            return redirect(url_for('admin.index'))
         return redirect(url_for('clinic.dashboard'))
     return render_template('auth_staff_login.html', form=form)

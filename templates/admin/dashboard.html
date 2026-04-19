@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Superadmin Dashboard</h1>
+    <div class="text-sm text-slate-600">Overview & clinic management</div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="bg-white p-4 rounded shadow">
+      <div class="text-sm text-slate-500">Total clinics</div>
+      <div class="text-2xl font-bold">{{ total_clinics }}</div>
+    </div>
+    <div class="bg-white p-4 rounded shadow">
+      <div class="text-sm text-slate-500">Pending requests</div>
+      <div class="text-2xl font-bold">{{ total_pending }}</div>
+    </div>
+    <div class="bg-white p-4 rounded shadow">
+      <div class="text-sm text-slate-500">Unread clinic notifications</div>
+      <div class="text-2xl font-bold">{{ total_unread }}</div>
+    </div>
+  </div>
+
+  <div class="bg-white p-4 rounded shadow">
+    <h2 class="text-lg font-semibold mb-3">Clinics</h2>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left">
+        <thead>
+          <tr class="text-slate-600 text-sm">
+            <th class="py-2 px-3">Name</th>
+            <th class="py-2 px-3">City</th>
+            <th class="py-2 px-3">Verified</th>
+            <th class="py-2 px-3">Active</th>
+            <th class="py-2 px-3">Pending</th>
+            <th class="py-2 px-3">Unread</th>
+            <th class="py-2 px-3">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in clinics %}
+            <tr class="border-t">
+              <td class="py-3 px-3">{{ c.name }}</td>
+              <td class="py-3 px-3 text-sm text-slate-600">{{ c.city_name or '—' }}</td>
+              <td class="py-3 px-3">{% if c.is_verified %}<span class="text-green-600 font-medium">Yes</span>{% else %}<span class="text-slate-500">No</span>{% endif %}</td>
+              <td class="py-3 px-3">{% if c.is_active %}<span class="text-green-600">Active</span>{% else %}<span class="text-amber-600">Inactive</span>{% endif %}</td>
+              <td class="py-3 px-3"><a href="{{ url_for('admin.clinic_requests', clinic_id=c.id) }}" class="text-sky-600 hover:underline">{{ c.pending_requests }}</a></td>
+              <td class="py-3 px-3">{{ c.unread_notifications }}</td>
+              <td class="py-3 px-3 space-x-2">
+                <form method="post" action="{{ url_for('admin.toggle_clinic', clinic_id=c.id) }}" class="inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="px-2 py-1 bg-slate-100 rounded text-sm">Toggle Active</button>
+                </form>
+                <form method="post" action="{{ url_for('admin.alert_clinic', clinic_id=c.id) }}" class="inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="message" value="Superadmin alert: please review pending approvals." />
+                  <button class="px-2 py-1 bg-amber-500 text-white rounded text-sm">Alert Clinic</button>
+                </form>
+              </td>
+            </tr>
+          {% else %}
+            <tr><td class="p-4" colspan="7">No clinics found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

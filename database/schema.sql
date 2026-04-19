@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS clinic (
   pricing JSON NULL,                     
   photos JSON NULL,                      
   is_verified TINYINT(1) DEFAULT 0,      
+  is_active TINYINT(1) DEFAULT 1,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (city_id) REFERENCES city(id) ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -84,7 +85,7 @@ CREATE TABLE IF NOT EXISTS patient (
   INDEX idx_patient_city (city_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DELETE FROM patient WHERE phone = '0781290496';
+
 
 CREATE TABLE IF NOT EXISTS appointment_request (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -144,6 +145,7 @@ CREATE TABLE IF NOT EXISTS staff (
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (clinic_id) REFERENCES clinic(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 -- Notifications table for in-app / email / sms tracking
 CREATE TABLE IF NOT EXISTS notification (
